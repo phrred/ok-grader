@@ -1,0 +1,64 @@
+Feature: Sandboxing with Docker. Make sure only Staff can access the Auto Grading System tool.
+As an Administrator
+So that no students can access this tool (the autograder route?)
+I want myself and the other administrators to be the only one that can access this grading tool.
+
+Scenario: Admin attempts to access with wrong url
+  Given I am a user with admin access
+  When I write a corrupt url to the autograder tool
+  Then I should see an error page
+
+Scenario: User attempts to access
+  Given I am a user with student access
+  When I attempt to access autograder tool
+  Then I should see a permission denied page
+
+Feature: Automated Autograder (API)
+As an Administrator
+So that I can automate the grading process for an assignment 
+I want to press the “Start Grading” button to update the Score for each Submission. 
+
+Scenario: No submission to grade
+  Given I have admin access
+  And I am on the assignments page
+  And I have no submissions on assignment ‘Hog’
+  When I press “Grade” for assignment ‘Hog’
+  Then I should receive a notification saying that there are no submissions to grade.
+
+Scenario: No script
+  Given I have admin access
+  And I am on the assignments page
+  And I have not uploaded a script
+  When I press “Grade” for assignment ‘Hog’
+  Then I should receive a notification saying that I need to upload a script.
+  
+
+Feature: Only Staff can access Autograding tool
+  As an Administrator
+  So that no students can access this tool (the autograder route?)
+  Administrators should be the only ones that can access this grading tool.
+
+  Scenario: Admin user grading
+    Given I have admin access
+    Given I am on the ‘Assignments’ page
+    When I press ‘Grade’ for assignment ‘Hog’
+    Then I should receive an HTTP 200 response
+
+  Scenario: Non-admin user grading
+    Given I do not have admin access
+    Given I am on the ‘Assignments’ page
+    When I press ‘Grade’ for assignment ‘Hog’
+    Then I should receive an HTTP 403 response
+
+
+Feature: Be able to view all submission scores
+As an Administrator
+So that I can see a list of all my grades
+I want to be able to access a page on the ok-grader website that displays a list of all grades for that assignment.
+
+Scenario: See scores computed by autograder
+  Given that the grading for Hog has completed
+  And I have admin access
+  And I am on the “Assignments” page
+  When I click on the Assignment “Hog”
+  Then I see all the scores for the Assignment “Hog” 
